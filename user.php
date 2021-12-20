@@ -8,10 +8,15 @@ class User
     public $firstname;
     public $lastname;
 
+    protected $bdd;
     //LE CONSTRUCTEUR SANS PARAMETRE
 
     public function __construct()
     {
+        $this->bdd = mysqli_connect('localhost', 'root', '', 'classes');
+        mysqli_set_charset($this->bdd, 'UTF8');
+
+        return $this->bdd;
     }
 
 
@@ -19,18 +24,15 @@ class User
     public function register($login, $password, $email, $firstname, $lastname)
     {
 
-        $bdd = mysqli_connect('localhost', 'root', '', 'classes');
-        mysqli_set_charset($bdd, 'UTF8');
-
         $sqlVerif = "SELECT * FROM utilisateurs WHERE login = '$login'";
-        $select = mysqli_query($bdd, $sqlVerif);
+        $select = mysqli_query($this->bdd, $sqlVerif);
 
         if (mysqli_num_rows($select)) {
             return "Ce login existe déjà , choisissez un autre";
         } else {
 
             $sql = "INSERT INTO `utilisateurs`(`login`, `password`, `email`, `firstname`, `lastname`) VALUES ('$login','$password','$email','$firstname','$lastname')";
-            $requete = mysqli_query($bdd, $sql);
+            $requete = mysqli_query($this->bdd, $sql);
             return '
                     <table>
                         <thead>
@@ -58,11 +60,8 @@ class User
     public function connect($login, $password)
     {
 
-        $bdd = mysqli_connect('localhost', 'root', '', 'classes');
-        mysqli_set_charset($bdd, 'UTF8');
-
         $sql = "SELECT * FROM `utilisateurs` WHERE login = '$login' AND password = '$password' ";
-        $requete = mysqli_query($bdd, $sql);
+        $requete = mysqli_query($this->bdd, $sql);
         $utilisateur = mysqli_fetch_all($requete, MYSQLI_ASSOC);
         var_dump($utilisateur);
         if (count($utilisateur) > 0) {
@@ -83,7 +82,6 @@ class User
             $this->firstname = $utilisateur[0]["firstname"];
             $this->lastname = $utilisateur[0]["lastname"];
 
-            //$this->$password = $password;
         } else {
             echo 'Le login ou le mot de passe est incorrect';
         }
@@ -101,10 +99,8 @@ class User
     public function delete()
     {
 
-        $bdd = mysqli_connect('localhost', 'root', '', 'classes');
-        mysqli_set_charset($bdd, 'UTF8');
         $sql = "DELETE FROM `utilisateurs` WHERE login = '$this->login'";
-        $requete = mysqli_query($bdd, $sql);
+        $requete = mysqli_query($this->bdd, $sql);
 
         unset($_SESSION['user_connect']);
     }
@@ -113,10 +109,9 @@ class User
 
     public function update($login, $password, $email, $firstname, $lastname)
     {
-        $bdd = mysqli_connect('localhost', 'root', '', 'classes');
-        mysqli_set_charset($bdd, 'UTF8');
+
         $sql = "UPDATE `utilisateurs` SET `login`='$login',`password`='$password',`email`='$email',`firstname`='$firstname',`lastname`='$lastname'";
-        $requete = mysqli_query($bdd, $sql);
+        $requete = mysqli_query($this->bdd, $sql);
 
         $this->login = $login;
         $this->email = $email;
@@ -192,8 +187,13 @@ class User
 $membre = new User;
 echo $membre->register('ahmed', 'ahmed', 'ahmed@lapla.fr', 'ahmed', 'ahmed');
 echo $membre->connect('ahmed', 'ahmed');
-echo $membre->getAllinfos();
 echo $membre->isConnected();
+echo $membre->getAllinfos().'<br>';
+echo $membre->getLogin().'<br>';
+echo $membre->getEmail().'<br>';
+echo $membre->getLogin().'<br>';
+echo $membre->getFirstname().'<br>';
+echo $membre->getLastname();
 var_dump($_SESSION['user_connect'])
 
 
